@@ -35,6 +35,11 @@ A diferencia de otros simuladores, `rentas.py` calcula la base media de los últ
 ### 3. Simulación de Escenarios
 A través de `core.py`, se pueden definir escenarios de inflación (IPC) y de incremento de bases máximas para años futuros (2027-2040).
 
+## ☑️ Prerrequisitos
+
+- Python 3.12.10 ó superior (https://www.python.org/downloads/)
+- Git (p. ej. git version 2.53.0.windows.2) (https://git-scm.com/install/windows)
+
 ## 🚀 Instalación Rápida
 
 1.  **Clonar y preparar entorno:**
