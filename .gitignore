@@ -1,0 +1,37 @@
+# --- SEGURIDAD ---
+# Variables de entorno
+.env
+
+# --- DATOS DEL PROYECTO ---
+
+# Bloquear todas las SALIDAS (evita subir cálculos personales o confidenciales)
+data/outputs/
+
+# Bloquear las ENTRADAS (evita subir tus bases de cotización reales)
+data/inputs/
+
+# OPCIONAL: Si quieres que la carpeta de entradas aparezca en Git 
+# pero vacía (solo las plantillas), puedes añadir estas excepciones:
+# !data/inputs/plantilla_vacia.csv
+!data/inputs/.gitkeep
+!data/outputs/.gitkeep
+
+# --- PYTHON ---
+__pycache__/
+app/__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+env/
+
+# --- ARCHIVOS DE SISTEMA / IDE ---
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+.syncmetadata
+
+# --- FICHEROS TEMPORALES ---
+*.tmp
+*.log
