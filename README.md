@@ -42,7 +42,7 @@ A través de `core.py`, se pueden definir escenarios de inflación (IPC) y de in
     git clone <repositorio>
     cd <repositorio>
     python -m venv venv
-    source venv/bin/activate  # venv\Scripts\activate en Windows
+    source venv/bin/activate  # venv\Scripts\activate o ó .\venv\Scripts\Activate.ps1 en Windows
     ```
 
 2.  **Instalar dependencias:**
