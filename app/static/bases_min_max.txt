@@ -1,0 +1,52 @@
+Año;Base Máxima Mensual (€);Base Mínima Mensual (€);Tipo de Dato
+1990;1752.19;350.66;Oficial (Tope máx. BOE / Tope mín. = SMI+1/6)
+1991;1839.82;373.38;Oficial (Tope máx. BOE / Tope mín. = SMI+1/6)
+1992;1931.77;394.62;Oficial (Tope máx. BOE / Tope mín. = SMI+1/6)
+1993;2032.20;410.40;Oficial (Tope máx. BOE / Tope mín. = SMI+1/6)
+1994;2103.24;424.71;Oficial (Tope máx. BOE / Tope mín. = SMI+1/6)
+1995;2176.81;439.64;Oficial (Tope máx. BOE / Tope mín. = SMI+1/6)
+1996;2253.07;455.21;Oficial (Tope máx. BOE / Tope mín. = SMI+1/6)
+1997;2311.67;467.19;Oficial (Tope máx. BOE / Tope mín. = SMI+1/6)
+1998;2360.17;477.09;Oficial (Tope máx. BOE / Tope mín. = SMI+1/6)
+1999;2402.73;485.71;Oficial (Tope máx. BOE / Tope mín. = SMI+1/6)
+2000;2450.87;495.65;Oficial (Tope máx. BOE / Tope mín. = SMI+1/6)
+2001;2499.91;505.80;Oficial (Tope máx. BOE / Tope mín. = SMI+1/6)
+2002;2574.90;516.00;Oficial (Tope máx. BOE / Tope mín. = SMI+1/6)
+2003;2652.00;526.50;Oficial (Tope máx. BOE / Tope mín. = SMI+1/6)
+2004;2731.50;537.30;Oficial (Tope máx. BOE / Tope mín. = SMI+1/6)
+2005;2813.40;598.50;Oficial (Tope máx. BOE / Tope mín. = SMI+1/6)
+2006;2897.70;631.20;Oficial (Tope máx. BOE / Tope mín. = SMI+1/6)
+2007;2996.10;665.70;Oficial (Tope máx. BOE / Tope mín. = SMI+1/6)
+2008;3074.10;699.90;Oficial (Tope máx. BOE / Tope mín. = SMI+1/6)
+2009;3166.20;728.10;Oficial (Tope máx. BOE / Tope mín. = SMI+1/6)
+2010;3198.00;738.90;Oficial
+2011;3230.10;748.20;Oficial
+2012;3262.50;748.20;Oficial
+2013;3425.70;753.00;Oficial
+2014;3597.00;753.00;Oficial
+2015;3606.00;756.60;Oficial
+2016;3642.00;764.40;Oficial
+2017;3751.20;825.60;Oficial
+2018;3803.70;858.60;Oficial
+2019;4070.10;1050.00;Oficial
+2020;4070.10;1050.00;Oficial
+2021;4070.10;1125.90;Oficial
+2022;4139.40;1166.70;Oficial
+2023;4495.50;1260.00;Oficial
+2024;4720.50;1323.00;Oficial
+2025;4909.50;1381.20;Oficial
+2026;5101.20;1381.20;Oficial (provisional mínimo)
+2027;5264.44;1425.40;Proyección (IPC+1.2% = 3.2% a/a)
+2028;5432.90;1471.01;Proyección (IPC+1.2% = 3.2% a/a)
+2029;5606.75;1518.08;Proyección (IPC+1.2% = 3.2% a/a)
+2030;5786.17;1566.66;Proyección (IPC+1.2% = 3.2% a/a)
+2031;5971.33;1616.80;Proyección (IPC+1.2% = 3.2% a/a)
+2032;6162.41;1668.53;Proyección (IPC+1.2% = 3.2% a/a)
+2033;6359.61;1721.93;Proyección (IPC+1.2% = 3.2% a/a)
+2034;6563.11;1777.03;Proyección (IPC+1.2% = 3.2% a/a)
+2035;6773.13;1833.89;Proyección (IPC+1.2% = 3.2% a/a)
+2036;6989.87;1892.58;Proyección (IPC+1.2% = 3.2% a/a)
+2037;7213.55;1953.14;Proyección (IPC+1.2% = 3.2% a/a)
+2038;7444.38;2015.64;Proyección (IPC+1.2% = 3.2% a/a)
+2039;7682.60;2080.14;Proyección (IPC+1.2% = 3.2% a/a)
+2040;7928.45;2146.70;Proyección (IPC+1.2% = 3.2% a/a)

@@ -1,0 +1,82 @@
+﻿Anio;IPC;Estado
+1970;6,80%;Historico
+1971;8,20%;Historico
+1972;8,30%;Historico
+1973;11,40%;Historico
+1974;15,70%;Historico
+1975;16,90%;Historico
+1976;17,60%;Historico
+1977;24,50%;Historico
+1978;19,70%;Historico
+1979;15,70%;Historico
+1980;15,60%;Historico
+1981;14,60%;Historico
+1982;14,40%;Historico
+1983;12,20%;Historico
+1984;11,30%;Historico
+1985;8,80%;Historico
+1986;8,80%;Historico
+1987;5,20%;Historico
+1988;4,80%;Historico
+1989;6,80%;Historico
+1990;6,70%;Historico
+1991;5,90%;Historico
+1992;5,90%;Historico
+1993;4,60%;Historico
+1994;4,70%;Historico
+1995;4,70%;Historico
+1996;3,60%;Historico
+1997;2,00%;Historico
+1998;1,80%;Historico
+1999;2,30%;Historico
+2000;3,40%;Historico
+2001;3,60%;Historico
+2002;3,50%;Historico
+2003;3,00%;Historico
+2004;3,00%;Historico
+2005;3,40%;Historico
+2006;3,50%;Historico
+2007;2,80%;Historico
+2008;4,10%;Historico
+2009;-0,30%;Historico
+2010;1,80%;Historico
+2011;3,20%;Historico
+2012;2,40%;Historico
+2013;1,40%;Historico
+2014;-0,20%;Historico
+2015;-0,50%;Historico
+2016;-0,20%;Historico
+2017;2,00%;Historico
+2018;1,70%;Historico
+2019;0,70%;Historico
+2020;-0,30%;Historico
+2021;3,10%;Historico
+2022;8,40%;Historico
+2023;3,50%;Historico
+2024;3,20%;Historico
+2025;2,40%;Proyeccion BdE
+2026;2,10%;Proyeccion BdE
+2027;1,90%;Proyeccion BdE
+2028;2,00%;Estimacion Tecnica
+2029;2,00%;Estimacion Tecnica
+2030;2,00%;Estimacion Tecnica
+2031;2,00%;Estimacion Tecnica
+2032;2,00%;Estimacion Tecnica
+2033;2,00%;Estimacion Tecnica
+2034;2,00%;Estimacion Tecnica
+2035;2,00%;Estimacion Tecnica
+2036;2,00%;Estimacion Tecnica
+2037;2,00%;Estimacion Tecnica
+2038;2,00%;Estimacion Tecnica
+2039;2,00%;Estimacion Tecnica
+2040;2,00%;Estimacion Tecnica
+2041;2,00%;Estimacion Tecnica
+2042;2,00%;Estimacion Tecnica
+2043;2,00%;Estimacion Tecnica
+2044;2,00%;Estimacion Tecnica
+2045;2,00%;Estimacion Tecnica
+2046;2,00%;Estimacion Tecnica
+2047;2,00%;Estimacion Tecnica
+2048;2,00%;Estimacion Tecnica
+2049;2,00%;Estimacion Tecnica
+2050;2,00%;Estimacion Tecnica

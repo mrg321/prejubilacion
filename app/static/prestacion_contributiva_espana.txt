@@ -1,0 +1,6 @@
+Tipo;Situacion;Importe
+Minima;Sin hijos;560,0
+Minima;Con hijos;749,0
+Maxima;Sin hijos;1225,0
+Maxima;1 hijo;1400,0
+Maxima;2 o mas hijos;1575,0

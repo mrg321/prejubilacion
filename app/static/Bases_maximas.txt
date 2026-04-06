@@ -1,0 +1,52 @@
+Año;Base Máxima Mensual (€);Tipo de Dato
+1990;1802.44;Histórico
+1991;1919.58;Histórico
+1992;2028.96;Histórico
+1993;2103.24;Histórico
+1994;2103.24;Histórico
+1995;2176.85;Histórico
+1996;2253.04;Histórico
+1997;2311.67;Histórico
+1998;2360.22;Histórico
+1999;2402.70;Histórico
+2000;2450.70;Histórico
+2001;2499.70;Histórico
+2002;2574.60;Histórico
+2003;2652.00;Histórico
+2004;2731.50;Histórico
+2005;2813.40;Histórico
+2006;2897.70;Histórico
+2007;2996.10;Histórico
+2008;3074.10;Histórico
+2009;3166.20;Histórico
+2010;3198.00;Histórico
+2011;3230.10;Histórico
+2012;3262.50;Histórico
+2013;3425.70;Histórico
+2014;3596.98;Histórico
+2015;3606.00;Histórico
+2016;3642.00;Histórico
+2017;3751.20;Histórico
+2018;3807.30;Histórico
+2019;4070.10;Histórico
+2020;4070.10;Histórico
+2021;4070.10;Histórico
+2022;4139.40;Histórico
+2023;4495.50;Histórico
+2024;4720.50;Histórico
+2025;4909.50;Histórico
+2026;5101.20;Dato Actual
+2027;5264.44;Proyección (IPC 2% + 1,2%)
+2028;5432.90;Proyección (IPC 2% + 1,2%)
+2029;5606.75;Proyección (IPC 2% + 1,2%)
+2030;5786.17;Proyección (IPC 2% + 1,2%)
+2031;5971.33;Proyección (IPC 2% + 1,2%)
+2032;6162.41;Proyección (IPC 2% + 1,2%)
+2033;6359.61;Proyección (IPC 2% + 1,2%)
+2034;6563.12;Proyección (IPC 2% + 1,2%)
+2035;6773.13;Proyección (IPC 2% + 1,2%)
+2036;6989.88;Proyección (IPC 2% + 1,2%)
+2037;7213.55;Proyección (IPC 2% + 1,2%)
+2038;7444.38;Proyección (IPC 2% + 1,2%)
+2039;7682.61;Proyección (IPC 2% + 1,2%)
+2040;7928.45;Proyección (IPC 2% + 1,2%)
