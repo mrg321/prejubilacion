@@ -303,3 +303,4 @@ MIT License
 # 🙌 Contribuciones
 
 Pull requests y mejoras son bienvenidas.
+Sólo se atenderán issues y peticiones de mejora desde https://github.com/mrg321/prejubilacion/issues
