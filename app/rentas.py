@@ -284,11 +284,9 @@ def calcular_rentas_hasta_65(
         # 2. Calcular base diaria según tu fórmula: (Suma Bases) / (Suma Días Reales)
         base_paro_diaria = suma_bases_6_meses / total_dias_reales
 
-        # 3. Calcular la base mensual estándar (multiplicado por 30)
-        base_paro_mensual = base_paro_diaria * 30
+        # 3. Calcular la base mensual estándar para el paro: base diaria * 365 / 12 (media anualizada)
+        base_paro_mensual = base_paro_diaria * 365 / 12
 
-
-        #base_paro_mensual = _media_6_meses_previos_para_paro(inicio_prest, dfm)
     else:
         inicio_prest = None
         base_paro_mensual = 0.0
