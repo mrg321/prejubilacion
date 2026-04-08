@@ -62,8 +62,36 @@ A través de `core.py`, se pueden definir escenarios de inflación (IPC) y de in
     - Tras la primera ejecución, tendrás un nuevo fichero csv en `data/inputs/bases_cotizacion.txt` que podrás retocar.
         - Recuerda que si quieres que se utilice el archivo retocado, lo deberás guardar como `data/inputs/bases_cotizacion_ok.txt`
     - Todos los parámetros utilizados para la simulación están en `app/static/` para consulta y actualización si fuera necesario.
-    - Todos los datos personales se tienen que introducir en el archivo `.env`. Existen ejemplos para TdE DC, TdE FC, TGS.
-        - Explicación parámetros:
+    - Todos los datos personales se tienen que introducir en el archivo `.env`. Este archivo se coloca en la ruta raíz del proyecto y es completamente privado, no se comparte con nadie. Existen ejemplos para TdE DC, TdE FC, TGS. (env.example.tde.dc.txt, env.example.tde.fc.txt, env.example.tgs.txt)
+
+## ⚙️ Configuración de Parámetros (`.env`)
+
+El archivo `.env` centraliza los datos del trabajador y las condiciones del escenario. A continuación se detallan los parámetros disponibles:
+
+### 📅 Fechas
+* **`FECHA_NACIMIENTO`**: Fecha de nacimiento del trabajador. Se usa para calcular la edad exacta en el momento de la baja y las edades de jubilación (63, 65 y ordinaria).
+* **`FECHA_INICIO_RELACION`**: Fecha de antigüedad en la empresa. Crucial para determinar la exención fiscal.
+* **`FECHA_BAJA`**: Fecha efectiva de salida de la empresa (inicio de la situación de desempleo).
+* **`FECHA_JUBILACION_ANTICIPADA`**: Fecha objetivo en la que el trabajador desea jubilarse efectivamente.
+
+### 💰 Compensación y Salarios
+* **`SALARIO_FIJO_ANUAL`** a **`POLIZA_SALUD`**: Conceptos retributivos. Algunos se incluyen en el cálculo del Salario Regulador y otros sólo se usan para calcular la exención fiscal.
+* **`NUM_HIJOS`**: Número de hijos para el cálculo del **Complemento de Brecha de Género** y para determinar los topes máximos de la prestación por desempleo.
+
+### 🛠️ Modalidad y Parámetros Económicos
+* **`MODALIDAD`**: Define el marco legal del cálculo (`ERE` para despido colectivo o `PSI` para planes individuales). Cambia la lógica de indemnización y cotización.
+* **`PCT_RENTA_HASTA_63 / 65`**: Porcentaje del salario neto/bruto que la empresa garantiza como renta mensual en cada tramo de edad.
+* **`PCT_REVAL_CONVENIO`**: Incremento anual estimado que se aplicará a los pagos del Convenio Especial con la Seguridad Social (CESS).
+* **`SEXO`** y **`APLICAR_BRECHA_GENERO`**: Determinan si se suma el complemento mensual por hijo en la pensión final (automático para mujeres, opcional para hombres según requisitos).
+* **`SEDE_FISCAL`**: Se usa para definir el máximo exento (`ESTATAL`, `VIZCAYA`, `NAVARRA`, etc.). La única excepción a los 180k exentos es para la sede VIZCAYA o BIZKAIA (183.600,00 €).
+
+### 📉 Linealidad y Ajustes (NUEVO)
+* **`APLICAR_LINEALIDAD`**: Si es `true`, el simulador ajusta la renta para que el trabajador perciba una cantidad constante (lineal) desde una edad determinada, compensando la caída de ingresos en el tramo final de edad.
+* **`EDAD_INICIO_LINEALIDAD`**: Edad (ej. 61) a partir de la cual se busca equilibrar la renta neta mensual.
+
+### 📂 Entradas y Salidas
+* **`INCLUIR_PENDIENTE`**: Filtrado opcional de años totalmente pendientes/guiones en Informe Bases Cotización Online.txt. Se recomienda dejar a 'false'.
+* **`EXPORT_EXCEL`**: Activa o desactiva la generación del informe detallado.
 
 ## 📋 Ejemplos de Uso
 
