@@ -1,39 +1,186 @@
 # 📊 Simulador de Jubilación y Rentas (Modelo ERE Telefónica 2026)
 
-Este ecosistema de scripts en Python permite realizar proyecciones financieras complejas para trabajadores en transición a la jubilación. Está diseñado específicamente para contemplar las reformas de la **Ley 21/2021** y las actualizaciones de bases y complementos previstas para **2026**. Está probado sólo para el ERE de Telefónica Global Solutions de 2026, pero es válido para las jurídicas: Telefónida España,
+Herramienta en Python para simular el impacto económico completo de una salida laboral (ERE o PSI), incluyendo:
+
+* 📊 Cálculo de jubilación anticipada
+* 💰 Proyección de rentas hasta los 65 años (SEPE + empresa + CESS)
+* 🧾 Cálculo de exención fiscal de la indemnización
+* 📈 Estimación del valor acumulado de la pensión hasta esperanza de vida
+* 🔁 Simulación iterativa de fechas de jubilación anticipada
+
+El resultado se exporta en Excel con detalle mensual y agregados.
+
+Está probado sólo para el ERE de Telefónica Global Solutions de 2026, pero es válido para las jurídicas: Telefónida España,
 Telefónica Soluciones, Telefónica Global Solutions, aunque con pocos cambios puede ser válido para el resto.
+
+# 🚀 ¿Qué hace este proyecto?
+
+Este repositorio implementa un **motor de simulación económico-fiscal** orientado a procesos de salida tipo ERE/PSI (especialmente casos tipo Telefónica 2026).
+
+A partir de datos reales del trabajador, el sistema:
+
+1. Reconstruye su historial de cotización
+2. Calcula su jubilación anticipada
+3. Proyecta ingresos hasta los 65 años
+4. Determina la fiscalidad de la indemnización
+5. Estima la pensión futura hasta esperanza de vida
+6. Permite comparar múltiples escenarios de jubilación
+
+# 🔄 Flujo de cálculo (end-to-end)
+
+El flujo principal está orquestado en `app/main.py`:
+
+```text
+1. Carga configuración (.env)
+2. Importa / genera bases de cotización
+3. Calcula jubilación anticipada
+4. Proyecta rentas hasta los 65
+5. Calcula exención fiscal
+6. Proyecta pensión futura
+7. Simula fechas alternativas de jubilación
+```
 
 ## 📁 Estructura del Proyecto
 
-* **`/app`**: Núcleo de la lógica.
-    * `main.py`: Punto de entrada del simulador.
-    * `jubilacion.py`: Cálculo de pensión, coeficientes reductores y brecha de género.
-    * `rentas.py`: Proyección de ingresos (Paro, Subsidios, CESS) hasta los 65 años.
-    * `core.py`: Funciones auxiliares, manejo de fechas y validaciones.
-    * `simulacion.py`: Simulador para obtener la edad ópdima de jubilación anticipada.
-    * `exencion.py` : Cálculo de la exención fiscal.
-    * `static/`: Tablas maestras de la Seguridad Social (IPC, bases mín/máx, coeficientes).
-    * `txt2bases_csv`: Convierte el fichero 'Informe Integral de Bases de Cotización' txt obtenido desde pdf a csv.
-* **`/data`**: Gestión de información persistente.
-    * `inputs/`: Historial de bases de cotización del usuario (`.txt` o `.csv`).
-    * `outputs/`: Informes detallados generados en formato Excel.
-* **`.env`**: Configuración de variables de entorno (no incluido en el repo por seguridad).
+```text
+app/
+├── main.py                  # Orquestador principal
+├── core.py                  # Configuración y utilidades
+├── jubilacion.py            # Cálculo de jubilación anticipada
+├── rentas.py                # Proyección de ingresos
+├── exencion.py              # Fiscalidad de indemnización
+├── estimador_pensiones.py   # Proyección de pensión
+├── simulacion.py            # Simulación de escenarios
+├── txt2bases_csv.py         # Parser de bases desde TXT
+├── static/                  # Parámetros estáticos en ficheros TXT/CSV
 
-## 🛠️ Funcionalidades Destacadas
+data/
+├── inputs/
+├── outputs/
 
-### 1. Cálculo de Pensión con Brecha de Género
-El sistema integra automáticamente el **Complemento de Brecha de Género** leyendo de `app/static/Brecha_Genero.txt`. 
-- Permite hasta 4 hijos.
-- Aplica proyecciones de revalorización anuales (IPC).
-- Compatible con jubilación anticipada involuntaria y voluntaria.
+env.example.*
+requirements.txt
+```
 
-### 2. Base Reguladora de Paro "Días Reales"
-A diferencia de otros simuladores, `rentas.py` calcula la base media de los últimos 180 días utilizando el **calendario natural**.
-- Identifica meses de 28, 30 y 31 días para un divisor exacto.
-- Ajusta el resultado a la base mensual de 30 días requerida por el SEPE.
+# 📥 Entradas del sistema
 
-### 3. Simulación de Escenarios
-A través de `core.py`, se pueden definir escenarios de inflación (IPC) y de incremento de bases máximas para años futuros (2027-2040).
+## 1. Archivo `.env`
+
+Define los parámetros del trabajador y del escenario. Explicado más abajo.
+
+---
+
+## 2. Bases de cotización
+
+Entrada desde:
+
+```text
+data/inputs/
+```
+
+Opciones:
+
+* ✔ CSV limpio (`bases_cotizacion_ok.txt`)
+* ✔ TXT exportado desde PDF de Seguridad Social
+
+El sistema puede convertir automáticamente el TXT a CSV.
+
+---
+
+# ⚙️ Funcionalidades principales
+
+## 📊 1. Importación y normalización de bases
+
+* Parser automático desde TXT (Adobe PDF)
+* Limpieza de datos inconsistentes
+* Generación de base mensual estructurada
+
+---
+
+## 👴 2. Cálculo de jubilación anticipada
+
+* Modalidad ERE / PSI
+* Causa involuntaria
+* Proyección de bases futuras
+* Revalorización anual
+* Uso de bases máximas
+
+---
+
+## 💰 3. Proyección de rentas hasta 65 años
+
+Incluye:
+
+* Prestación por desempleo (media últimos 180 días)
+* Renta empresa
+* Convenio especial (CESS)
+* Ajustes por:
+
+  * Edad (antes/después de 63)
+  * Linealidad opcional
+  * Transformación de 14 a 12 pagas
+
+---
+
+## 🧾 4. Cálculo de exención fiscal
+
+* Segmentación:
+
+  * Pre 12/02/2012 → 45 días/año
+  * Post → 33 días/año
+* Tope de mensualidades
+* Tope fiscal por territorio
+* Reducción del 30% por rendimientos irregulares
+* Diferenciación:
+
+  * ✔ ERE → puede haber exención
+  * ❌ PSI → no aplica exención
+
+---
+
+## 📈 5. Proyección de pensión futura
+
+* Desde jubilación hasta esperanza de vida
+* Basado en:
+
+  * IPC
+  * Tablas de esperanza de vida
+* Salida:
+
+  * Serie mensual
+  * Total acumulado
+
+---
+
+## 🔁 6. Simulación de fechas de jubilación
+
+Funcionalidad clave del proyecto:
+
+* Itera mes a mes la fecha de jubilación anticipada
+* Calcula para cada escenario:
+
+  * Rentas totales
+  * Fiscalidad
+  * Pensión acumulada
+* Exporta comparativa a Excel
+
+👉 Ideal para encontrar la fecha óptima de salida.
+
+---
+
+# 📤 Salidas
+
+Generadas en:
+
+```text
+data/outputs/
+```
+
+Principales archivos:
+
+* 📄 `Resumen_Calculo_Jubilacion.xlsx`
+* 📄 `Resumen_Rentas.xlsx`
+* 📄 Resultados de simulación
 
 ## ☑️ Prerrequisitos
 
@@ -134,10 +281,25 @@ El archivo `.gitignore` está configurado para proteger tu privacidad:
 - **Mantiene** la estructura de carpetas gracias a los archivos `.gitkeep`.
 
 ## ⚠️ Nota Legal
+
 Este software es una herramienta de apoyo y consulta basada en la interpretación de la ley vigente. Los cálculos definitivos deben ser validados siempre por uno mismo y carecen de cualquier valor contractual o legal.
+👉 Revisar siempre con asesor fiscal.
 
 ---
 
-### Tips de mantenimiento:
-> [!TIP]
-> Si actualizas las bases de cotización en `data/inputs/`, recuerda borrar el contenido de `app/__pycache__/` para asegurar que Python refresque todas las referencias lógicas en la próxima ejecución.
+# 🧠 Próximas mejoras sugeridas
+
+* Interfaz web / dashboard
+* Visualización avanzada (gráficos)
+
+---
+
+# 📄 Licencia
+
+MIT License
+
+---
+
+# 🙌 Contribuciones
+
+Pull requests y mejoras son bienvenidas.
