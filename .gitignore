@@ -10,6 +10,9 @@ data/outputs/
 # Bloquear las ENTRADAS (evita subir tus bases de cotización reales)
 data/inputs/
 
+# Bloquear las ficheros temporales
+data/temp/
+
 # OPCIONAL: Si quieres que la carpeta de entradas aparezca en Git 
 # pero vacía (solo las plantillas), puedes añadir estas excepciones:
 # !data/inputs/plantilla_vacia.csv

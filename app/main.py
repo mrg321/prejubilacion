@@ -9,7 +9,7 @@ import json
 import pandas as pd
 
 from core import (RUTA_BASES_COTIZACION, RUTA_BASES_OK, RUTA_EXCEL_RESUMEN_JUBILACION,
-                  RUTA_TXT_BASES, EXCEL_SALIDA_PATH)
+                  RUTA_TXT_BASES, RUTA_PDF_BASES, EXCEL_SALIDA_PATH)
 from openpyxl import load_workbook
 from jubilacion import calcular_jubilacion_anticipada
 from rentas import calcular_rentas_hasta_65
@@ -21,7 +21,9 @@ from estimador_pensiones import (
 from simulacion import ParametrosSimulacion, ejecutar_simulacion  # simulación iterativa
 
 # --- NUEVO: conversor desde TXT (Adobe) a CSV con 12 meses ---
-from txt2bases_csv import txt_to_rows, write_csv
+from txt2bases_csv import txt_to_rows, write_csv, pdf_to_text
+
+from pathlib import Path
 
 
 # ========== NUEVO: Carga .env si existe (sin dependencias externas) ==========
@@ -124,27 +126,55 @@ RUTA_CSV_BASES = RUTA_BASES_COTIZACION  # usa la ruta por defecto de core
 
 if __name__ == "__main__":
     # ==============
-    # 0) TXT (Adobe) -> CSV (formato ; con 12 meses)
+    # 0) PDF/TXT -> CSV (formato ; con 12 meses)
     # ==============
     df_bases_in = None
     try:
         df_bases_in = pd.read_csv(RUTA_BASES_OK, sep=";", encoding="utf-8-sig")
         print(f"[OK] Cargado CSV de bases desde {RUTA_BASES_OK} (filas: {len(df_bases_in)})")
+
     except FileNotFoundError:
-        print(f"[AVISO] No encontré el CSV en {RUTA_BASES_OK}. Intentando generar desde {RUTA_TXT_BASES}...")
-        try:
-            rows = txt_to_rows(RUTA_TXT_BASES, include_pending=INCLUIR_PENDIENTE)
-            write_csv(rows, RUTA_CSV_BASES, encoding="utf-8-sig")
-            print(f"[OK] Generado CSV de bases: {RUTA_CSV_BASES} (filas: {len(rows)})")
+        print(f"[AVISO] No encontré el CSV en {RUTA_BASES_OK}.")
+
+        txt_origen = None
+
+        # 1) Intentar usar TXT si ya existe
+        if Path(RUTA_TXT_BASES).exists():
+            txt_origen = RUTA_TXT_BASES
+            print(f"[OK] Encontrado TXT origen: {RUTA_TXT_BASES}")
+
+        # 2) Si no existe TXT, intentar generarlo desde PDF
+        elif Path(RUTA_PDF_BASES).exists():
+            print(f"[AVISO] No encontré el TXT {RUTA_TXT_BASES}. Intentando generarlo desde PDF: {RUTA_PDF_BASES}...")
             try:
-                df_bases_in = pd.read_csv(RUTA_CSV_BASES, sep=";", encoding="utf-8-sig")
-                print(f"[OK] Cargado CSV de bases desde {RUTA_CSV_BASES} (filas: {len(df_bases_in)})")
+                pdf_to_text(RUTA_PDF_BASES, RUTA_TXT_BASES)
+                txt_origen = RUTA_TXT_BASES
+                print(f"[OK] TXT generado desde PDF: {RUTA_TXT_BASES}")
             except Exception as e:
-                print(f"[ERROR] No pude cargar el CSV generado: {e}")
-        except FileNotFoundError:
+                print(f"[ERROR] No pude convertir el PDF a TXT: {e}")
+
+        # 3) Si tenemos TXT, generar CSV
+        if txt_origen is not None:
+            try:
+                rows = txt_to_rows(txt_origen, include_pending=INCLUIR_PENDIENTE)
+                write_csv(rows, RUTA_CSV_BASES, encoding="utf-8-sig")
+                print(f"[OK] Generado CSV de bases: {RUTA_CSV_BASES} (filas: {len(rows)})")
+
+                try:
+                    df_bases_in = pd.read_csv(RUTA_CSV_BASES, sep=";", encoding="utf-8-sig")
+                    print(f"[OK] Cargado CSV de bases desde {RUTA_CSV_BASES} (filas: {len(df_bases_in)})")
+                except Exception as e:
+                    print(f"[ERROR] No pude cargar el CSV generado: {e}")
+
+            except FileNotFoundError:
+                print(f"[ERROR] No encontré el TXT origen: {txt_origen}")
+            except Exception as e:
+                print(f"[ERROR] No pude generar el CSV desde el TXT: {e}")
+
+        else:
             print(
-                f"[AVISO] No encontré el TXT {RUTA_TXT_BASES}. "
-                "Si necesitas generar el CSV desde el TXT, exporta antes el PDF a TXT con Adobe y vuelve a ejecutar."
+                f"[AVISO] No encontré ni el CSV ({RUTA_BASES_OK}), ni el TXT ({RUTA_TXT_BASES}), "
+                f"ni el PDF ({RUTA_PDF_BASES})."
             )
 
     # 1) Cálculo de jubilación anticipada

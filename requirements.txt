@@ -2,3 +2,4 @@ pandas
 numpy
 python-dateutil
 openpyxl
+pymupdf

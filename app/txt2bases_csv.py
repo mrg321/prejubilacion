@@ -2,16 +2,20 @@
 # -*- coding: utf-8 -*-
 
 """
-Convierte el TXT exportado desde Adobe del "Informe Integral de Bases de Cotización"
-a un CSV (separado por ';') con columnas:
+Convierte el PDF digital o el TXT exportado desde Adobe del
+"Informe Integral de Bases de Cotización" a un CSV (separado por ';')
+con columnas:
 Año;Empresa;Enero;Febrero;...;Diciembre
 
-Ejemplo de uso:
-  python txt2bases_csv.py -i "Informe Bases Cotización Online.txt" -o "Bases_Cotizacion.csv"
+Ejemplos de uso:
+  python pdf_txt2bases_csv.py -i "Informe Bases Cotización Online.pdf" -o "Bases_Cotizacion.csv"
+  python pdf_txt2bases_csv.py -i "Informe Bases Cotización Online.txt" -o "Bases_Cotizacion.csv"
 
 Opciones:
   --include-pending   Incluye años con todos los meses 'Pendiente'/'---' (por defecto, excluye).
   --encoding ENC      Encoding del CSV (por defecto: utf-8-sig; usar 'latin-1' si Excel antiguo).
+  --keep-txt          Si el input es PDF, conserva el TXT intermedio.
+  --txt-output PATH   Si el input es PDF, guarda el TXT intermedio en esta ruta.
 """
 
 from __future__ import annotations
@@ -20,6 +24,9 @@ import csv
 import argparse
 from pathlib import Path
 from typing import List, Tuple
+import tempfile
+
+import fitz  # pip install pymupdf
 
 MONTHS = ["Enero","Febrero","Marzo","Abril","Mayo","Junio",
           "Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"]
@@ -32,6 +39,33 @@ YEAR_RE = re.compile(r"^((?:19|20)\d{2})\b(.*)$")
 
 # Números estilo ES (permite 2.402,73 o 944,79 o 240,27, etc.)
 NUM_RE = re.compile(r"^\d{1,3}(?:\.\d{3})*,\d{2}$|^\d+,\d{2}$")
+
+def pdf_to_text(input_pdf: str | Path, output_txt: str | Path | None = None) -> Path:
+    """
+    Extrae el texto de un PDF digital y lo guarda en un .txt
+    de forma parecida a 'Guardar como texto' de Adobe Acrobat.
+    """
+    input_pdf = Path(input_pdf)
+
+    if not input_pdf.exists():
+        raise FileNotFoundError(f"No existe el archivo: {input_pdf}")
+
+    if output_txt is None:
+        output_txt = input_pdf.with_suffix(".txt")
+    else:
+        output_txt = Path(output_txt)
+
+    all_pages: List[str] = []
+
+    with fitz.open(input_pdf) as doc:
+        for page in doc:
+            text = page.get_text("text")
+            all_pages.append(text.rstrip())
+
+    content = "\n\n".join(all_pages).strip() + "\n"
+    output_txt.write_text(content, encoding="utf-8")
+
+    return output_txt
 
 def prenormalize_all(text: str) -> str:
     """
@@ -217,6 +251,42 @@ def txt_to_rows(txt_path: str | Path, include_pending: bool = False) -> List[Lis
     all_rows.sort(key=sort_key)
     return all_rows
 
+def input_to_txt(input_path: str | Path, txt_output: str | Path | None = None, keep_txt: bool = False) -> tuple[Path, bool]:
+    """
+    Acepta PDF o TXT.
+    - Si es TXT, lo devuelve tal cual.
+    - Si es PDF, lo convierte antes a TXT.
+    Devuelve: (ruta_txt, is_temp)
+    """
+    input_path = Path(input_path)
+
+    if not input_path.exists():
+        raise FileNotFoundError(f"No existe el archivo: {input_path}")
+
+    suffix = input_path.suffix.lower()
+
+    if suffix == ".txt":
+        return input_path, False
+
+    if suffix == ".pdf":
+        if txt_output is not None:
+            txt_path = Path(txt_output)
+            pdf_to_text(input_path, txt_path)
+            return txt_path, False
+
+        if keep_txt:
+            txt_path = input_path.with_suffix(".txt")
+            pdf_to_text(input_path, txt_path)
+            return txt_path, False
+
+        tmp = tempfile.NamedTemporaryFile(prefix="bases_pdf_", suffix=".txt", delete=False)
+        tmp_path = Path(tmp.name)
+        tmp.close()
+        pdf_to_text(input_path, tmp_path)
+        return tmp_path, True
+
+    raise ValueError("El input debe ser un archivo .pdf o .txt")
+
 
 def write_csv(rows: List[List[str]], out_path: str | Path, encoding: str = "utf-8-sig") -> Path:
     out_path = Path(out_path)
@@ -230,18 +300,44 @@ def write_csv(rows: List[List[str]], out_path: str | Path, encoding: str = "utf-
 
 
 def main():
-    ap = argparse.ArgumentParser(description="Convierte TXT (Adobe) del Informe de Bases a CSV ;")
-    ap.add_argument("-i", "--input", required=True, help="Ruta al TXT exportado desde Adobe.")
+    ap = argparse.ArgumentParser(
+        description="Convierte PDF digital o TXT del Informe de Bases a CSV separado por ';'"
+    )
+    ap.add_argument("-i", "--input", required=True, help="Ruta al PDF digital o al TXT exportado.")
     ap.add_argument("-o", "--output", required=True, help="Ruta de salida CSV (separado por ';').")
     ap.add_argument("--include-pending", action="store_true",
                     help="Incluye años totalmente 'Pendiente'/'---' (por defecto, excluidos).")
     ap.add_argument("--encoding", default="utf-8-sig",
                     help="Encoding del CSV (p. ej., 'utf-8-sig' o 'latin-1').")
+    ap.add_argument("--keep-txt", action="store_true",
+                    help="Si el input es PDF, conserva el TXT intermedio junto al PDF.")
+    ap.add_argument("--txt-output",
+                    help="Si el input es PDF, guarda el TXT intermedio en esta ruta.")
     args = ap.parse_args()
 
-    rows = txt_to_rows(args.input, include_pending=args.include_pending)
-    out = write_csv(rows, args.output, encoding=args.encoding)
-    print(f"[OK] CSV generado: {out}  (filas: {len(rows)})")
+    txt_path = None
+    is_temp = False
+
+    try:
+        txt_path, is_temp = input_to_txt(
+            args.input,
+            txt_output=args.txt_output,
+            keep_txt=args.keep_txt
+        )
+
+        rows = txt_to_rows(txt_path, include_pending=args.include_pending)
+        out = write_csv(rows, args.output, encoding=args.encoding)
+
+        print(f"[OK] CSV generado: {out}  (filas: {len(rows)})")
+        if Path(args.input).suffix.lower() == ".pdf":
+            print(f"[OK] TXT intermedio usado: {txt_path}")
+
+    finally:
+        if is_temp and txt_path is not None and txt_path.exists():
+            try:
+                txt_path.unlink()
+            except Exception:
+                pass
 
 
 if __name__ == "__main__":
