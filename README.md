@@ -205,7 +205,7 @@ Principales archivos:
 3.  **Configurar Datos:**
     - Extrae tu informe pdf de bases de cotización de:
         https://portal.seg-social.gob.es/wps/portal/importass/importass/Categorias/Vida+laboral+e+informes/Informes+de+tus+cotizaciones/Informe+de+bases+de+cotizacion
-    - Abre el informe en pdf con Adobe Acrobat y guárdalo como txt en `data/inputs/Informe Bases Cotización Online.txt`.
+    - Cópialo en `data/inputs/Informe Bases Cotización Online.pdf`.
     - Tras la primera ejecución, tendrás un nuevo fichero csv en `data/inputs/bases_cotizacion.txt` que podrás retocar.
         - Recuerda que si quieres que se utilice el archivo retocado, lo deberás guardar como `data/inputs/bases_cotizacion_ok.txt`
     - Todos los parámetros utilizados para la simulación están en `app/static/` para consulta y actualización si fuera necesario.
