@@ -7,6 +7,8 @@ from pathlib import Path
 from collections import defaultdict
 import logging
 
+from app.core import setup_logging
+
 MONTHS = [
     "Enero","Febrero","Marzo","Abril","Mayo","Junio",
     "Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"
@@ -178,7 +180,10 @@ def main():
     parser = argparse.ArgumentParser(description="Normaliza CSV de bases a formato mensual por año")
     parser.add_argument("-i", "--input", required=False, help="CSV de entrada")
     parser.add_argument("-o", "--output", required=False, help="CSV de salida")
+    parser.add_argument("--debug", action="store_true")
     args = parser.parse_args()
+
+    setup_logging(args.debug)
 
     # Obtiene la carpeta donde reside el script actual
     BASE_DIR = Path(__file__).resolve().parent

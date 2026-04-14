@@ -7,6 +7,10 @@ from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
 import calendar
 from typing import List, Optional, Iterable, Tuple, Dict, Any, List
+import logging
+import sys
+from pathlib import Path
+
 
 # -------------------- CONSTANTES CENTRALIZADAS --------------------
 # SMI vigente (RD 87/2025), prórroga transitoria a 2026 hasta nuevo RD
@@ -361,7 +365,34 @@ def _log_kv_rows(iter_idx: int, fecha_jub_ant: datetime, paso: str, kv: Dict[str
         )
     return rows
 
-# NUEVO: configuración de escenario
+
+def setup_logging(debug: bool, log_file: Optional[str] = "extraccion.log"):
+    """
+    Configura los logs para que salgan por consola y opcionalmente a un archivo.
+    """
+    level = logging.DEBUG if debug else logging.INFO
+    
+    # Formato detallado para el archivo (incluye fecha y hora)
+    file_formatter = logging.Formatter('%(asctime)s - %(levelname)s - [%(funcName)s] - %(message)s')
+    # Formato simple para la consola
+    console_formatter = logging.Formatter('%(levelname)s: %(message)s')
+
+    root_logger = logging.getLogger()
+    root_logger.setLevel(level)
+
+    # Handler para Consola
+    console_handler = logging.StreamHandler(sys.stdout)
+    console_handler.setFormatter(console_formatter)
+    root_logger.addHandler(console_handler)
+
+    # Handler para Archivo
+    if log_file:
+        file_handler = logging.FileHandler(log_file, encoding='utf-8')
+        file_handler.setFormatter(file_formatter)
+        root_logger.addHandler(file_handler)
+        logging.info(f"Log de depuración configurado en: {Path(log_file).absolute()}")
+
+# configuración de escenario
 from dataclasses import dataclass
 from typing import Literal, Optional
 
