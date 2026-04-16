@@ -80,7 +80,7 @@ def read_input_csv(path: Path):
         raise
 
 
-def transform(rows):
+def transform(rows, include_pending=False):
     """
     Transforma filas (listas de strings) a estructura tabular:
     Año + Empresa + 12 meses.
@@ -158,6 +158,14 @@ def transform(rows):
     # 4. Construcción de la lista final
     final_rows = []
     for (year, empresa), months_dict in result.items():
+        valores = list(months_dict.values())
+        # --- si no incluir pendientes ---
+        if not include_pending:
+            # Solo mantenemos la fila si hay al menos un dato que no sea '---' ni contenga 'Pendiente'
+            tiene_dato_real = any(v and v != "---" and "Pendiente" not in v for v in valores)
+            if not tiene_dato_real:
+                continue
+            
         row = [year, empresa] + [months_dict[m] for m in months_names]
         final_rows.append(row)
 

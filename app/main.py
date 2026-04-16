@@ -152,7 +152,7 @@ if __name__ == "__main__":
             print(f"[INFO] No hay TXT. Intentando normalizar CSV bruto: {RUTA_CSV_BASES}...")
             try:
                 raw_rows = read_input_csv(Path(RUTA_CSV_BASES))
-                normalized_rows = transform(raw_rows)
+                normalized_rows = transform(raw_rows, include_pending=INCLUIR_PENDIENTE)
                                 
                 # Guardamos directamente el resultado final
                 write_csv(normalized_rows, RUTA_BASES_COTIZACION, encoding="utf-8-sig")
