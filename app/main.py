@@ -333,4 +333,4 @@ if __name__ == "__main__":
         verbose=True,
         df_bases_in=df_bases_in,  # <-- DataFrame extraído del PDF para usarlo en cada iteración
     )
-    #ejecutar_simulacion(params_sim)
+    ejecutar_simulacion(params_sim)
