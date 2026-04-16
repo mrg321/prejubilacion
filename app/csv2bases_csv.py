@@ -7,7 +7,7 @@ from pathlib import Path
 from collections import defaultdict
 import logging
 
-from app.core import setup_logging
+from core import setup_logging
 
 MONTHS = [
     "Enero","Febrero","Marzo","Abril","Mayo","Junio",

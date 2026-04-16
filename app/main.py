@@ -9,7 +9,7 @@ import json
 import pandas as pd
 
 from core import (RUTA_BASES_COTIZACION, RUTA_BASES_OK, RUTA_EXCEL_RESUMEN_JUBILACION,
-                  RUTA_TXT_BASES, RUTA_PDF_BASES, EXCEL_SALIDA_PATH)
+                  RUTA_TXT_BASES, RUTA_PDF_BASES, RUTA_CSV_BASES, EXCEL_SALIDA_PATH)
 from openpyxl import load_workbook
 from jubilacion import calcular_jubilacion_anticipada
 from rentas import calcular_rentas_hasta_65
@@ -20,8 +20,11 @@ from estimador_pensiones import (
 )
 from simulacion import ParametrosSimulacion, ejecutar_simulacion  # simulación iterativa
 
-# --- NUEVO: conversor desde TXT (Adobe) a CSV con 12 meses ---
+# --- Conversor desde TXT (Adobe) a CSV con 12 meses ---
 from txt2bases_csv import txt_to_rows, write_csv, pdf_to_text
+
+# --- NUEVO: conversor desde CSV irregular a CSV con 12 meses (usando csv2bases_csv.py) ---
+from csv2bases_csv import read_input_csv, transform, transform
 
 from pathlib import Path
 
@@ -122,60 +125,72 @@ SEXO = _get_str("SEXO", "HOMBRE")  # para proyección
 APLICAR_LINEALIDAD = _get_bool("APLICAR_LINEALIDAD", False)
 EDAD_INICIO_LINEALIDAD = _get_int("EDAD_INICIO_LINEALIDAD", 61)  # edad a partir de la cual se aplica linealidad (p.ej. 61, 62, etc.)
 
-RUTA_CSV_BASES = RUTA_BASES_COTIZACION  # usa la ruta por defecto de core
-
 if __name__ == "__main__":
     # ==============
-    # 0) PDF/TXT -> CSV (formato ; con 12 meses)
+    # 0) FLUJO DE CARGA Y RECONSTRUCCIÓN DE BASES
     # ==============
     df_bases_in = None
+    
+    # Intentar carga del fichero final ya procesado
     try:
         df_bases_in = pd.read_csv(RUTA_BASES_OK, sep=";", encoding="utf-8-sig")
-        print(f"[OK] Cargado CSV de bases desde {RUTA_BASES_OK} (filas: {len(df_bases_in)})")
+        print(f"[OK] Cargado fichero de bases final desde {RUTA_BASES_OK} (filas: {len(df_bases_in)})")
 
     except FileNotFoundError:
-        print(f"[AVISO] No encontré el CSV en {RUTA_BASES_OK}.")
+        print(f"[AVISO] No existe {RUTA_BASES_OK}. Iniciando búsqueda de fuentes...")
+        
+        reconstruccion_exitosa = False
+        fuente_txt_para_procesar = None
 
-        txt_origen = None
-
-        # 1) Intentar usar TXT si ya existe
+        # --- OPCIÓN 1: Intentar usar TXT existente ---
         if Path(RUTA_TXT_BASES).exists():
-            txt_origen = RUTA_TXT_BASES
-            print(f"[OK] Encontrado TXT origen: {RUTA_TXT_BASES}")
+            print(f"[OK] Encontrado TXT intermedio: {RUTA_TXT_BASES}")
+            fuente_txt_para_procesar = RUTA_TXT_BASES
 
-        # 2) Si no existe TXT, intentar generarlo desde PDF
+        # --- OPCIÓN 2: Si no hay TXT, intentar desde CSV BRUTO (csv2bases_csv.py) ---
+        elif Path(RUTA_CSV_BASES).exists():
+            print(f"[INFO] No hay TXT. Intentando normalizar CSV bruto: {RUTA_CSV_BASES}...")
+            try:
+                raw_rows = read_input_csv(Path(RUTA_CSV_BASES))
+                normalized_rows = transform(raw_rows)
+                                
+                # Guardamos directamente el resultado final
+                write_csv(normalized_rows, RUTA_BASES_COTIZACION, encoding="utf-8-sig")
+                reconstruccion_exitosa = True
+                #fuente_txt_para_procesar = RUTA_BASES_COTIZACION
+                print(f"[OK] Bases reconstruidas exitosamente desde CSV bruto.")
+            except Exception as e:
+                print(f"[ERROR] Falló el procesamiento del CSV bruto: {e}")
+
+        # --- OPCIÓN 3: Si nada de lo anterior existe, generar TXT desde PDF ---
         elif Path(RUTA_PDF_BASES).exists():
-            print(f"[AVISO] No encontré el TXT {RUTA_TXT_BASES}. Intentando generarlo desde PDF: {RUTA_PDF_BASES}...")
+            print(f"[AVISO] No hay TXT ni CSV bruto. Generando TXT desde PDF: {RUTA_PDF_BASES}...")
             try:
                 pdf_to_text(RUTA_PDF_BASES, RUTA_TXT_BASES)
-                txt_origen = RUTA_TXT_BASES
-                print(f"[OK] TXT generado desde PDF: {RUTA_TXT_BASES}")
+                fuente_txt_para_procesar = RUTA_TXT_BASES
+                print(f"[OK] TXT generado desde PDF.")
             except Exception as e:
-                print(f"[ERROR] No pude convertir el PDF a TXT: {e}")
+                print(f"[ERROR] No pude extraer texto del PDF: {e}")
 
-        # 3) Si tenemos TXT, generar CSV
-        if txt_origen is not None:
+        # --- PROCESAMIENTO FINAL (Si la fuente elegida fue un TXT) ---
+        if fuente_txt_para_procesar and not reconstruccion_exitosa:
             try:
-                rows = txt_to_rows(txt_origen, include_pending=INCLUIR_PENDIENTE)
-                write_csv(rows, RUTA_CSV_BASES, encoding="utf-8-sig")
-                print(f"[OK] Generado CSV de bases: {RUTA_CSV_BASES} (filas: {len(rows)})")
-
-                try:
-                    df_bases_in = pd.read_csv(RUTA_CSV_BASES, sep=";", encoding="utf-8-sig")
-                    print(f"[OK] Cargado CSV de bases desde {RUTA_CSV_BASES} (filas: {len(df_bases_in)})")
-                except Exception as e:
-                    print(f"[ERROR] No pude cargar el CSV generado: {e}")
-
-            except FileNotFoundError:
-                print(f"[ERROR] No encontré el TXT origen: {txt_origen}")
+                rows = txt_to_rows(fuente_txt_para_procesar, include_pending=INCLUIR_PENDIENTE)
+                write_csv(rows, RUTA_BASES_COTIZACION, encoding="utf-8-sig")
+                reconstruccion_exitosa = True
+                print(f"[OK] Bases generadas desde TXT: {RUTA_BASES_COTIZACION}")
             except Exception as e:
-                print(f"[ERROR] No pude generar el CSV desde el TXT: {e}")
+                print(f"[ERROR] Falló el parseo del TXT: {e}")
 
+        # --- CARGA DEL RESULTADO EN PANDAS ---
+        if reconstruccion_exitosa:
+            try:
+                df_bases_in = pd.read_csv(RUTA_BASES_COTIZACION, sep=";", encoding="utf-8-sig")
+                print(f"[OK] Datos cargados en el sistema (filas: {len(df_bases_in)})")
+            except Exception as e:
+                print(f"[ERROR] Error al leer el CSV generado: {e}")
         else:
-            print(
-                f"[AVISO] No encontré ni el CSV ({RUTA_BASES_OK}), ni el TXT ({RUTA_TXT_BASES}), "
-                f"ni el PDF ({RUTA_PDF_BASES})."
-            )
+            print(f"[ERROR CRÍTICO] No se encontró ninguna fuente para reconstruir las bases.")
 
     # 1) Cálculo de jubilación anticipada
     res_jub = calcular_jubilacion_anticipada(
@@ -318,4 +333,4 @@ if __name__ == "__main__":
         verbose=True,
         df_bases_in=df_bases_in,  # <-- DataFrame extraído del PDF para usarlo en cada iteración
     )
-    ejecutar_simulacion(params_sim)
+    #ejecutar_simulacion(params_sim)

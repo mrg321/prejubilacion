@@ -25,6 +25,7 @@ RUTA_BASES_COTIZACION = "data/inputs/bases_cotizacion.txt"  # CSV con columnas '
 RUTA_BASES_OK = "data/inputs/bases_cotizacion_ok.txt"  # CSV con columnas 'Año', 'Empresa', 'Enero', ..., 'Diciembre' (salida de txt2bases_csv.py)
 RUTA_TXT_BASES="data/inputs/Informe Bases Cotización Online.txt"  # Ruta del txt original descargado de la Seguridad Social (sin formato tabular)
 RUTA_PDF_BASES="data/inputs/Informe Bases Cotización Online.pdf"  # Ruta del PDF original descargado de la Seguridad Social (sin formato tabular)
+RUTA_CSV_BASES="data/inputs/Libro1.csv"  # CSV desestructurado exportado manualmente desde el PDF pasando por WORD y Excel (sin formato tabular, con filas de años/empresas y meses mezclados)
 RUTA_INCREMENTO_BASES_REGULADORAS = "app/static/incremento_bases_reguladoras.txt"  # CSV con columnas 'fecha' (YYYY-MM-01) y 'pct_incremento' (float)
 RUTA_COEFICIENTES_JAI = "app/static/coeficientes_jubilacion_anticipada_involuntaria.txt"  # CSV con columnas 'fecha' (YYYY-MM-01) y 'coeficiente' (float)
 RUTA_COEFICIENTES_JAV = "app/static/coeficientes_jubilacion_anticipada_voluntaria.txt"  # CSV con columnas 'fecha' (YYYY-MM-01) y 'coeficiente' (float)

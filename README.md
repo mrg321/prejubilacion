@@ -52,6 +52,7 @@ app/
 ├── estimador_pensiones.py   # Proyección de pensión
 ├── simulacion.py            # Simulación de escenarios
 ├── txt2bases_csv.py         # Parser de bases desde TXT
+├── csv2bases_csv.py         # Parser de bases desde CSV (PDF --> WORD --> EXCEL --> CSV)
 ├── static/                  # Parámetros estáticos en ficheros TXT/CSV
 
 data/
@@ -81,9 +82,15 @@ data/inputs/
 Opciones:
 
 * ✔ CSV limpio (`bases_cotizacion_ok.txt`)
-* ✔ TXT exportado desde PDF de Seguridad Social
+* ✔ CSV procedente del proceso manual:
 
-El sistema puede convertir automáticamente el TXT a CSV.
+  * Abrir PDF exportado del Portal de la Seguridad Social con MS WORD
+  * Copiar todo el contenido al portapapeles
+  * Pegar en MS EXCEL
+  * Grabar como CSV UTF-8 (`Libro1.csv`)
+
+* ✔ CSV procedente de una ejecución anterior (`bases_cotizacion.txt`)
+* ✔ PDF exportado desde el Portal de la Seguridad Social (`Informe Bases Cotización Online.pdf`)
 
 ---
 
@@ -91,7 +98,7 @@ El sistema puede convertir automáticamente el TXT a CSV.
 
 ## 📊 1. Importación y normalización de bases
 
-* Parser automático desde TXT (Adobe PDF)
+* Parser automático desde PDF o CSV
 * Limpieza de datos inconsistentes
 * Generación de base mensual estructurada
 
@@ -162,6 +169,7 @@ Funcionalidad clave del proyecto:
   * Rentas totales
   * Fiscalidad
   * Pensión acumulada
+
 * Exporta comparativa a Excel
 
 👉 Ideal para encontrar la fecha óptima de salida.
