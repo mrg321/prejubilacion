@@ -175,9 +175,9 @@ def calcular_exencion_fiscal(
     sede_upper = str(sede_fiscal or "").strip().upper()
     limite_por_sede = float(limite_exencion_absoluto)
 
-    # La única excepción actual es Vizcaya, que tiene un tope específico de 183.600 € actualizado en 2025)
+    # La única excepción actual es Vizcaya, que tiene un tope específico de 187.272 € actualizado en 2026)
     if sede_upper in {"VIZCAYA", "BIZKAIA"}:
-        limite_por_sede = 183_600.0
+        limite_por_sede = 187_272.0
 
     # --- CAMBIO: en PSI NO hay exención fiscal de ningún tipo
     if is_PSI:
