@@ -297,6 +297,7 @@ Este software es una herramienta de apoyo y consulta basada en la interpretació
 
 # 🧠 Próximas mejoras sugeridas
 
+* Pases de categoría y bienios para tde 'dentro de convenio'
 * Interfaz web / dashboard
 * Visualización avanzada (gráficos)
 
