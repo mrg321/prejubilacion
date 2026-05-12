@@ -240,7 +240,7 @@ def calcular_jubilacion_anticipada(
         ) from e
 
 
-    # 1. Carga del fichero Brecha_Genero.txt
+    # 1. Carga del fichero brecha_genero.txt
     try:
         df_brecha = pd.read_csv(RUTA_BRECHA_GENERO, sep=';', decimal=',')
         # Diccionario para búsqueda rápida por año
@@ -750,7 +750,7 @@ def calcular_jubilacion_anticipada(
     ]
     if config_rows.empty:
         raise ValueError(
-            f"No existe configuración de BR para el año {fecha_jubilacion_anticipada.year} en 'Incremento_bases_reguladoras.txt'."
+            f"No existe configuración de BR para el año {fecha_jubilacion_anticipada.year} en {RUTA_INCREMENTO_BASES_REGULADORAS}."
         )
     config = config_rows.iloc[0]
     divisor = float(config['Divisor (dividir entre)'])
@@ -801,7 +801,7 @@ def calcular_jubilacion_anticipada(
     fila_pension_max = df_pensiones_maximas[df_pensiones_maximas['Año'] == anio_jubilacion]
     if fila_pension_max.empty:
         raise ValueError(
-            f"No se encuentra la pensión máxima para {anio_jubilacion} en 'Evolucion_pension_maxima.txt'."
+            f"No se encuentra la pensión máxima para {anio_jubilacion} en {RUTA_EVOLUCION_PENSION_MAXIMA}."
         )
     pension_max_mensual_est_anio_jub = float(fila_pension_max['Pensión Mensual (€)'].values[0])
     pension_max_anual_est_anio_jub = float(fila_pension_max['Pensión Anual (€)'].values[0])

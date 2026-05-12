@@ -152,7 +152,7 @@ def proyectar_una_opcion(
       - Detalle_Rentas -> apende filas de la opción seleccionada (1 o 2) como 'PENSION'
     """
     
-    #RUTA_EV = 'Esperanza_Vida.txt'  # Formato: Año;Hombres;Mujeres
+    #RUTA_EV = 'esperanza_vida.txt'  # Formato: Año;Hombres;Mujeres
  
     # Cargar datos de esperanza de vida
     df_ev = cargar_esperanza_vida(RUTA_EV)
