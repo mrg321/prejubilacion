@@ -5,6 +5,7 @@ from __future__ import annotations
 
 from datetime import datetime
 import os
+import sys
 import json
 import pandas as pd
 
@@ -29,11 +30,15 @@ from csv2bases_csv import read_input_csv, transform, transform
 from pathlib import Path
 
 
-# ========== NUEVO: Carga .env si existe (sin dependencias externas) ==========
-def _load_env_if_exists():
+# ========== NUEVO: Carga .env. El fichero debe estar en el directorio raíz ==========
+def _load_env():
     env_path = os.path.join(os.getcwd(), ".env")
     if not os.path.isfile(env_path):
-        return
+        raise ValueError(
+            f"ERROR: fichero .env no encontrado en {env_path}.\n Por favor," + 
+            "crea un fichero .env con las variables de entorno necesarias (puedes basarte en .env.example) y vuelve a ejecutar."
+        )
+
     with open(env_path, "r", encoding="utf-8") as f:
         for line in f:
             line = line.strip()
@@ -46,7 +51,7 @@ def _load_env_if_exists():
             if k and (k not in os.environ):
                 os.environ[k] = v
 
-_load_env_if_exists()
+_load_env()
 
 
 # ===================== Helpers de lectura tipada desde ENV ===================
