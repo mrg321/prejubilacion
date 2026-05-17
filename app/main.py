@@ -8,6 +8,7 @@ import os
 import sys
 import json
 import pandas as pd
+import glob
 
 from core import (RUTA_BASES_COTIZACION, RUTA_BASES_OK, RUTA_EXCEL_RESUMEN_JUBILACION,
                   RUTA_TXT_BASES, RUTA_PDF_BASES, RUTA_CSV_BASES, EXCEL_SALIDA_PATH)
@@ -173,10 +174,12 @@ if __name__ == "__main__":
             # --- OPCIÓN 3: Si nada de lo anterior existe, generar TXT desde PDF ---
             else:
                 print(f"[INFO] No hay CSV bruto. Buscando PDF en {RUTA_PDF_BASES}...")
-                if Path(RUTA_PDF_BASES).exists():
+                archivos = glob.glob(RUTA_PDF_BASES)  # para evitar problemas con la ó en el nombre
+                archivo = archivos[0] if archivos else None
+                if Path(archivo).exists():
                     print(f"[AVISO] No hay TXT ni CSV bruto. Generando TXT desde PDF: {RUTA_PDF_BASES}...")
                     try:
-                        pdf_to_text(RUTA_PDF_BASES, RUTA_TXT_BASES)
+                        pdf_to_text(archivo, RUTA_TXT_BASES)
                         fuente_txt_para_procesar = RUTA_TXT_BASES
                         print(f"[OK] TXT generado desde PDF.")
                     except Exception as e:
