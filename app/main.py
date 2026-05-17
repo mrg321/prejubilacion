@@ -148,34 +148,39 @@ if __name__ == "__main__":
         fuente_txt_para_procesar = None
 
         # --- OPCIÓN 1: Intentar usar TXT existente ---
+        print(f"[INFO] Buscando TXT intermedio en {RUTA_TXT_BASES}...")
         if Path(RUTA_TXT_BASES).exists():
             print(f"[OK] Encontrado TXT intermedio: {RUTA_TXT_BASES}")
             fuente_txt_para_procesar = RUTA_TXT_BASES
 
         # --- OPCIÓN 2: Si no hay TXT, intentar desde CSV BRUTO (csv2bases_csv.py) ---
-        elif Path(RUTA_CSV_BASES).exists():
-            print(f"[INFO] No hay TXT. Intentando normalizar CSV bruto: {RUTA_CSV_BASES}...")
-            try:
-                raw_rows = read_input_csv(Path(RUTA_CSV_BASES))
-                normalized_rows = transform(raw_rows, include_pending=INCLUIR_PENDIENTE)
-                                
-                # Guardamos directamente el resultado final
-                write_csv(normalized_rows, RUTA_BASES_COTIZACION, encoding="utf-8-sig")
-                reconstruccion_exitosa = True
-                #fuente_txt_para_procesar = RUTA_BASES_COTIZACION
-                print(f"[OK] Bases reconstruidas exitosamente desde CSV bruto.")
-            except Exception as e:
-                print(f"[ERROR] Falló el procesamiento del CSV bruto: {e}")
+        else:
+            print(f"[INFO] No hay TXT. Buscando CSV bruto en {RUTA_CSV_BASES}...")
+            if Path(RUTA_CSV_BASES).exists():
+                print(f"[INFO] No hay TXT. Intentando normalizar CSV bruto: {RUTA_CSV_BASES}...")
+                try:
+                    raw_rows = read_input_csv(Path(RUTA_CSV_BASES))
+                    normalized_rows = transform(raw_rows, include_pending=INCLUIR_PENDIENTE)
+                                    
+                    # Guardamos directamente el resultado final
+                    write_csv(normalized_rows, RUTA_BASES_COTIZACION, encoding="utf-8-sig")
+                    reconstruccion_exitosa = True
+                    #fuente_txt_para_procesar = RUTA_BASES_COTIZACION
+                    print(f"[OK] Bases reconstruidas exitosamente desde CSV bruto.")
+                except Exception as e:
+                    print(f"[ERROR] Falló el procesamiento del CSV bruto: {e}")
 
-        # --- OPCIÓN 3: Si nada de lo anterior existe, generar TXT desde PDF ---
-        elif Path(RUTA_PDF_BASES).exists():
-            print(f"[AVISO] No hay TXT ni CSV bruto. Generando TXT desde PDF: {RUTA_PDF_BASES}...")
-            try:
-                pdf_to_text(RUTA_PDF_BASES, RUTA_TXT_BASES)
-                fuente_txt_para_procesar = RUTA_TXT_BASES
-                print(f"[OK] TXT generado desde PDF.")
-            except Exception as e:
-                print(f"[ERROR] No pude extraer texto del PDF: {e}")
+            # --- OPCIÓN 3: Si nada de lo anterior existe, generar TXT desde PDF ---
+            else:
+                print(f"[INFO] No hay CSV bruto. Buscando PDF en {RUTA_PDF_BASES}...")
+                if Path(RUTA_PDF_BASES).exists():
+                    print(f"[AVISO] No hay TXT ni CSV bruto. Generando TXT desde PDF: {RUTA_PDF_BASES}...")
+                    try:
+                        pdf_to_text(RUTA_PDF_BASES, RUTA_TXT_BASES)
+                        fuente_txt_para_procesar = RUTA_TXT_BASES
+                        print(f"[OK] TXT generado desde PDF.")
+                    except Exception as e:
+                        print(f"[ERROR] No pude extraer texto del PDF: {e}")
 
         # --- PROCESAMIENTO FINAL (Si la fuente elegida fue un TXT) ---
         if fuente_txt_para_procesar and not reconstruccion_exitosa:
