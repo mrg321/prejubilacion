@@ -190,6 +190,12 @@ Principales archivos:
 * 📄 `Resumen_Rentas.xlsx`
 * 📄 Resultados de simulación
 
+## ✨ NUEVO: Ejecución en Google Colab (sólo se requiere un único fichero y disponer de cuenta en Google con Drive)
+
+Sube el fichero [notebook.ipynb](https://github.com/mrg321/prejubilacion/blob/main/notebook.ipynb) a tu cuenta de 
+[Google Colab](https://colab.research.google.com/) y sigue las instrucciones que hay dentro.
+
+
 ## ☑️ Prerrequisitos
 
 - Python 3.12.10 ó superior (https://www.python.org/downloads/)
