@@ -259,33 +259,16 @@ def calcular_rentas_hasta_65(
     # --- [2] Inicio prestación / base reguladora (sólo si hay SEPE) ---
     if tiene_SEPE:
         if verbose:
-            print("[2] Ajustando inicio de prestación y base reguladora (media 6 meses)")
+            print("[2] Obteniendo base de prestación del mes de inicio desde jubilacion.py")
         inicio_prest = _nearest_month_start(fecha_baja)
-
-
-        # 1. Identificar los 6 meses anteriores a la fecha de baja
-        meses_anteriores = [fecha_baja - relativedelta(months=i) for i in range(1, 7)]
-
-        suma_bases_6_meses = 0.0
-        total_dias_reales = 0
-
-        for mes_dt in meses_anteriores:
-            # Obtener la base de cotización de ese mes desde el DataFrame de entrada
-            # Usamos la función auxiliar _get_base_mensual_para_mes que ya existe en el script
-            base_mes = _get_base_mensual_para_mes(df_bases_mensuales, mes_dt)
-            
-            # Calcular días reales del mes (ej: Septiembre=30, Octubre=31, Febrero=28...)
-            # calendar.monthrange devuelve (dia_semana_inicio, numero_dias)
-            dias_en_mes = calendar.monthrange(mes_dt.year, mes_dt.month)[1]
-            
-            suma_bases_6_meses += base_mes
-            total_dias_reales += dias_en_mes
-
-        # 2. Calcular base diaria según tu fórmula: (Suma Bases) / (Suma Días Reales)
-        base_paro_diaria = suma_bases_6_meses / total_dias_reales
-
-        # 3. Calcular la base mensual estándar para el paro: base diaria * 365 / 12 (media anualizada)
-        base_paro_mensual = base_paro_diaria * 365 / 12
+        fila_base_inicio_sepe = dfm.loc[dfm['fecha'] == inicio_prest, 'base']
+        if fila_base_inicio_sepe.empty:
+            raise ValueError(
+                "No se encuentra en df_bases_mensuales la base del mes de inicio "
+                f"de la prestación ({inicio_prest:%m-%Y}); debe venir calculada o "
+                "extrapolada desde calcular_jubilacion_anticipada."
+            )
+        base_paro_mensual = float(fila_base_inicio_sepe.iloc[0])
 
     else:
         inicio_prest = None
@@ -773,7 +756,7 @@ def calcular_rentas_hasta_65(
     ])
 
     df_intermedios = pd.DataFrame([
-        {"Grupo": "Paro", "Campo": "Base paro mensual (media 6 meses previos)", "Valor": round(base_paro_mensual, 2)},
+        {"Grupo": "Paro", "Campo": "Base paro mensual (mes de inicio, desde bases de jubilación)", "Valor": round(base_paro_mensual, 2)},
         {"Grupo": "Paro", "Campo": "Días cotizados previos (últ. 6 años)", "Valor": dias_cotizados_previos},
         {"Grupo": "Paro", "Campo": "Días de prestación (por tabla)", "Valor": dias_prestacion},
         {"Grupo": "Paro", "Campo": "Mínimo mensual (por hijos)", "Valor": round(min_mensual, 2)},

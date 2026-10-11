@@ -5,6 +5,7 @@ import pandas as pd
 import numpy as np
 from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
+import unicodedata
 from core import (EPS_TOLERANCIA_MAXIMA, RUTA_BASES_COTIZACION, RUTA_INCREMENTO_BASES_REGULADORAS, RUTA_COEFICIENTES_JAI,
                   RUTA_COEFICIENTES_JAV, RUTA_EVOLUCION_PENSION_MAXIMA, RUTA_BASES_MAXIMAS, UMBRAL_MIN_MATCH, UMBRAL_ULTIMOS_MESES,
                   RUTA_BRECHA_GENERO, RUTA_TABLA_IPC)
@@ -36,6 +37,7 @@ def _detalle_calculo_para_fecha(
     aplicar_incremento_2: bool = False,
     # NUEVO:
     muestra_sepe: bool = True,
+    sepe_importado: bool = False,
 ) -> str:
     """Devuelve la descripción textual del criterio usado para la base de cotización
     del mes *f*, en función del contexto de cálculo suministrado por parámetros.
@@ -43,14 +45,21 @@ def _detalle_calculo_para_fecha(
     """
     f0 = datetime(f.year, f.month, 1)
 
-    # 1) Histórico
+    # 1) SEPE importado o completado a partir de las bases SEPE importadas
+    if sepe_importado and muestra_sepe and inicio_sepe <= f0 < fin_sepe:
+        return (
+            "Período SEPE presente en el fichero de importación: se conserva la última "
+            "base cotizada disponible y se extrapola hasta el fin de la prestación."
+        )
+
+    # 2) Histórico
     if f0 <= ultima_real:
         return (
             "Valor original del histórico de bases (fichero de importación). "
             "Si valor no numérico 'p. ej. Sin base registrada' BASE MÍNIMA."
         )
 
-    # 2) SEPE
+    # 3) SEPE calculado
     if muestra_sepe and (inicio_sepe <= f0 < fin_sepe):
         return ("Prestación por desempleo: base constante = media diaria de los 180 días previos "
                 "(base mensual/30) * 30. Sin revalorización.")
@@ -313,25 +322,67 @@ def calcular_jubilacion_anticipada(
              'Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre']
     marcadores_nulos = {'---', 'Pendiente', 'Sin base', 'nan', '', 'None'}
 
+    def normalizar_texto_base(raw: str) -> str:
+        texto = unicodedata.normalize('NFKD', raw.strip())
+        return texto.encode('ascii', 'ignore').decode('ascii').lower()
+
     # 2.0 Histórico mensual compacto
     bases_lista = []
+    fechas_sepe_importadas = set()
+    bases_sepe_importadas = {}
+    ultima_base_conocida = None
     for _, row in df_bases.iterrows():
         anio = int(row['Año'])
+        empresa_normalizada = normalizar_texto_base(str(row.get('Empresa', '')))
+        fila_sepe_importada = (
+            'prestacion' in empresa_normalizada
+            or 'desempleo' in empresa_normalizada
+        )
         for i, mes in enumerate(meses, start=1):
             raw = str(row.get(mes, '')).strip()
-            if raw not in marcadores_nulos:
-                try:
-                    base_float = float(raw.replace('.', '').replace(',', '.'))
-                    bases_lista.append({'fecha': datetime(anio, i, 1), 'base': base_float})
-                except ValueError:
-                    # NUEVO: sustituir valor no numérico por la base mínima del año
-                    base_min = base_min_for_year(anio)
-                    bases_lista.append({'fecha': datetime(anio, i, 1), 'base': base_min})
+            if raw in marcadores_nulos:
+                continue
+
+            fecha_base = datetime(anio, i, 1)
+            try:
+                base_float = float(raw.replace('.', '').replace(',', '.'))
+                bases_lista.append({'fecha': fecha_base, 'base': base_float})
+                ultima_base_conocida = base_float
+                if fila_sepe_importada:
+                    fechas_sepe_importadas.add(fecha_base)
+                    bases_sepe_importadas[fecha_base] = base_float
                     if verbose:
                         print(
-                            f" ! Aviso: valor no numérico '{raw}' en {mes}-{anio} → "
-                            f"se sustituye por BASE MÍNIMA {base_min:.2f} €"
+                            f" -> Base SEPE importada detectada en {mes}-{anio}: "
+                            f"{base_float:.2f} €."
                         )
+            except ValueError:
+                if fila_sepe_importada:
+                    base_sepe = (
+                        ultima_base_conocida
+                        if ultima_base_conocida is not None
+                        else base_min_for_year(anio)
+                    )
+                    bases_lista.append({'fecha': fecha_base, 'base': base_sepe})
+                    fechas_sepe_importadas.add(fecha_base)
+                    bases_sepe_importadas[fecha_base] = base_sepe
+                    ultima_base_conocida = base_sepe
+                    if verbose:
+                        print(
+                            f" -> Base SEPE importada no numérica en {mes}-{anio}: "
+                            f"se conserva la última base conocida ({base_sepe:.2f} €)."
+                        )
+                    continue
+
+                # NUEVO: sustituir valor no numérico por la base mínima del año
+                base_min = base_min_for_year(anio)
+                bases_lista.append({'fecha': fecha_base, 'base': base_min})
+                ultima_base_conocida = base_min
+                if verbose:
+                    print(
+                        f" ! Aviso: valor no numérico '{raw}' en {mes}-{anio} → "
+                        f"se sustituye por BASE MÍNIMA {base_min:.2f} €"
+                    )
 
     df_hist = pd.DataFrame(bases_lista)
     if df_hist.empty:
@@ -442,19 +493,44 @@ def calcular_jubilacion_anticipada(
 
     inicio_sepe = _month_start(fecha_baja_ere_despido)
     fin_sepe = _add_months(inicio_sepe, max(0, int(meses_SEPE)))  # exclusivo
+    meses_sepe_importados = []
 
     if tiene_SEPE and meses_SEPE > 0:
-        base_paro_mensual = media_180_dias_previos(inicio_sepe, df_ext)
-        df_sepe = []
-        curr = inicio_sepe
-        while curr < fin_sepe and curr <= _month_start(fecha_jubilacion_anticipada):
-            df_sepe.append({'fecha': curr, 'base': base_paro_mensual})
-            curr = _add_months(curr, 1)
-        df_sepe = pd.DataFrame(df_sepe)
-        if not df_sepe.empty:
-            df_ext = pd.concat([df_ext, df_sepe], ignore_index=True)
-        if verbose:
-            print(f" -> SEPE activado: base={base_paro_mensual:.2f} €, meses={len(df_sepe)}")
+        meses_sepe_importados = sorted(
+            fecha for fecha in fechas_sepe_importadas
+            if inicio_sepe <= fecha < fin_sepe
+        )
+        if meses_sepe_importados:
+            # El fichero ya contiene meses cotizados de SEPE. Se completa el resto
+            # del período copiando la última base SEPE importada, sin recalcularla.
+            ultima_fecha_sepe = meses_sepe_importados[-1]
+            base_paro_mensual = float(bases_sepe_importadas[ultima_fecha_sepe])
+            fechas_existentes = set(df_ext['fecha'])
+            df_sepe = []
+            curr = inicio_sepe
+            while curr < fin_sepe and curr <= _month_start(fecha_jubilacion_anticipada):
+                if curr not in fechas_existentes:
+                    df_sepe.append({'fecha': curr, 'base': base_paro_mensual})
+                curr = _add_months(curr, 1)
+            if df_sepe:
+                df_ext = pd.concat([df_ext, pd.DataFrame(df_sepe)], ignore_index=True)
+            if verbose:
+                print(
+                    f" -> SEPE importado: se conserva la base de {ultima_fecha_sepe:%m-%Y} "
+                    f"({base_paro_mensual:.2f} €) y se completa el período sin duplicar meses."
+                )
+        else:
+            base_paro_mensual = media_180_dias_previos(inicio_sepe, df_ext)
+            df_sepe = []
+            curr = inicio_sepe
+            while curr < fin_sepe and curr <= _month_start(fecha_jubilacion_anticipada):
+                df_sepe.append({'fecha': curr, 'base': base_paro_mensual})
+                curr = _add_months(curr, 1)
+            df_sepe = pd.DataFrame(df_sepe)
+            if not df_sepe.empty:
+                df_ext = pd.concat([df_ext, df_sepe], ignore_index=True)
+            if verbose:
+                print(f" -> SEPE calculado con media 180 días: base={base_paro_mensual:.2f} €, meses={len(df_sepe)}")
     else:
         if verbose:
             print(" -> SEPE desactivado para este escenario (p.ej. PSI)")
@@ -550,7 +626,15 @@ def calcular_jubilacion_anticipada(
     fecha_65 = fecha_nacimiento + relativedelta(years=65)
     fecha_67 = fecha_nacimiento + relativedelta(years=67)
 
-    df_cum = df_temp.sort_values('fecha', ascending=True).copy()
+    # Las bases SEPE importadas se mantienen para la BR, pero no deben
+    # adelantar artificialmente la fecha ordinaria usada por la validación.
+    fechas_sepe_actuales = {
+        fecha for fecha in fechas_sepe_importadas
+        if inicio_sepe <= fecha < fin_sepe
+    }
+    df_cum = df_temp.loc[~df_temp['fecha'].isin(fechas_sepe_actuales)].sort_values(
+        'fecha', ascending=True
+    ).copy()
     df_cum['mes_cotizado'] = (df_cum['base'] > 0).astype(int)
     df_cum['cum_meses'] = df_cum['mes_cotizado'].cumsum()
 
@@ -688,6 +772,7 @@ def calcular_jubilacion_anticipada(
         umbral_min_match=UMBRAL_MIN_MATCH,
         fecha_corte_cess=fecha_corte_cess,
         aplicar_incremento_2=aplicar_incremento_2,
+        sepe_importado=bool(meses_sepe_importados),
     )
 
     df_bases_export['Detalle_Cálculo'] = df_bases_export['fecha'].apply(
